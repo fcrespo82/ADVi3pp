@@ -62,13 +62,15 @@ cp "${advi3pp}/.pioenvs/advi3pp_52c_bltouch/firmware.hex" "${release}/ADVi3pp-Ma
 cp "${advi3pp}/.pioenvs/advi3pp_54/firmware.hex" "${release}/ADVi3pp-Mainboard-54-${version}.hex"
 ret=$?; if [[ $ret != 0 ]]; then exit $ret; fi
 
-echo
-echo "***** Copy Arduino Core..."
-echo
-pushd "${advi3pp}" >/dev/null || exit
-zip -r -x@"${scripts}"/excludes-core.txt "${release}/ArduinoCore-${version}.zip" ArduinoCore
-ret=$?; if [[ $ret != 0 ]]; then popd && exit $ret; fi
-popd >/dev/null || exit
+# As Atmel Studio is not specific to Arduino development, it does not include Arduino Core library by default.
+# Disable arduino core for now because I'm not using Atmel Studio.
+# echo
+# echo "***** Copy Arduino Core..."
+# echo
+# pushd "${advi3pp}" >/dev/null || exit
+# zip -r -x@"${scripts}"/excludes-core.txt "${release}/ArduinoCore-${version}.zip" ArduinoCore
+# ret=$?; if [[ $ret != 0 ]]; then popd && exit $ret; fi
+# popd >/dev/null || exit
 
 echo
 echo "**** ADVi3++ ${version} is ready in ${release}"
