@@ -3,7 +3,7 @@
 Create a new release.
 '
 
-if [[ "$OSTYPE" != "darwin"* ]]; then echo "Work only on macOS, sorry" ; exit 1; fi
+# if [[ "$OSTYPE" != "darwin"* ]]; then echo "Work only on macOS, sorry" ; exit 1; fi
 
 function pause(){
    read -r -s -k "?$*"$'\n'

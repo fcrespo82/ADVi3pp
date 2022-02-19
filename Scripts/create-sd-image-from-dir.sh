@@ -3,7 +3,7 @@
 Create a microSD disk image from a source directory.
 '
 
-if [[ "$OSTYPE" != "darwin"* ]]; then echo "Work only on macOS, sorry" ; exit 1; fi
+# if [[ "$OSTYPE" != "darwin"* ]]; then echo "Work only on macOS, sorry" ; exit 1; fi
 if [[ $# -ne 5 ]] ; then echo "Invalid number of arguments" ; exit 1; fi
 
 version=$1
@@ -27,13 +27,22 @@ ret=$?; if [[ $ret != 0 ]]; then exit $ret; fi
 img="${release}/${imgname}-${version}.img"
 
 echo "Create microSD image..."
-dd if=/dev/zero bs=1m count=260 of="${img}"
+[[ "$OSTYPE" == "darwin"* ]] && BS="1m"
+[[ "$OSTYPE" == "linux"* ]] && BS="1M"
+dd if=/dev/zero bs=$BS count=260 of="${img}"
 
 echo "Format as FAT32 8 sectors per cluster..."
 mkfs.fat -F 32 -n "${label}" -s 8 -v "${img}"
 
 echo "Mount the SD image..."
-mount=$( sudo hdiutil attach -readwrite -imagekey diskimage-class=CRawDiskImage "${img}" | awk '{print $2}' )
+if [[ "$OSTYPE" == "darwin"* ]] {
+  mount=$( sudo hdiutil attach -readwrite -imagekey diskimage-class=CRawDiskImage "${img}" | awk '{print $2}' )
+} elif [[ "$OSTYPE" == "linux"* ]] {
+  mount=/tmp/advi3-lcd
+  mkdir -p "${mount}"
+  sudo mount -t vfat -o user,uid=$(id -u) "${img}" "${mount}"
+  ret=$?; if [[ $ret != 0 ]]; then mount=""; fi
+}
 if [[ "${mount}" == "" ]]; then echo "Mounting failed" ; exit 1; fi
 
 echo "Copy files..."
@@ -45,7 +54,12 @@ find "${mount}" -name '.DS_Store' -delete
 find "${mount}" -name '._*' -type f -delete
 
 echo "Detach the SD image..."
-sudo hdiutil detach "${mount}"
+if [[ "$OSTYPE" == "darwin"* ]] {
+  sudo hdiutil detach "${mount}"
+} elif [[ "$OSTYPE" == "linux"* ]] {
+  sudo umount "${mount}"
+  rm -rf "${mount}"
+}
 
 echo "Compress the SD image..."
 zip -j "${img}.zip" "${img}"

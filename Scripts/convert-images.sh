@@ -9,7 +9,19 @@ third-parties open-source projects able to extract resources from a sketch file.
 '
 
 sketchtool="/Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool"
-[[ -f ${sketchtool} ]] || { echo "Sorry, this script requires Sketch app (macOS) in order to work."; exit 1; }
+[[ -f ${sketchtool} || -v FROM_FIGMA ]] || { 
+    echo "Sorry, this script requires Sketch app (macOS) in order to work.";
+
+    echo "If you want you can import the file to figma"
+    echo "Install fonts from Fonts folder"
+    echo "Install font installer from https://www.figma.com/downloads/"
+    echo "Install plugin 'Export Images' (https://www.figma.com/community/plugin/1073791321657719341/Export-images)";
+    echo "Run it, select all nodes and them click export"
+    echo "Put all exported images in Sketch-Export folder"
+
+    echo "Then run this script again with FROM_FIGMA=1 ./convert-images.sh"
+    exit 1; 
+}
 
 scripts="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ret=$?; if [[ $ret != 0 ]]; then exit $ret; fi
@@ -55,14 +67,15 @@ function convert_images() {
 
 }
 
-clean_files "${sketch_export_dir}/DWIN_SET" "png"
-clean_files "${sketch_export_dir}/Controls" "png"
-clean_files "${sketch_export_dir}/Screenshots" "png"
-clean_files "${dgus}/DWIN_SET" "bmp"
-clean_files "${dgus}/25_Controls" "bmp"
-
-export_sketches
-ret=$?; if [[ $ret != 0 ]]; then exit $ret; fi
+if [[ ! -v FROM_FIGMA ]] { 
+    clean_files "${sketch_export_dir}/DWIN_SET" "png"
+    clean_files "${sketch_export_dir}/Controls" "png"
+    clean_files "${sketch_export_dir}/Screenshots" "png"
+    clean_files "${dgus}/DWIN_SET" "bmp"
+    clean_files "${dgus}/25_Controls" "bmp"
+    export_sketches
+    ret=$?; if [[ $ret != 0 ]]; then exit $ret; fi
+}
 
 convert_images "${root}/Masters/Boot"             "${dgus}/DWIN_SET"
 convert_images "${root}/Sketch-Export/DWIN_SET"   "${dgus}/DWIN_SET"
