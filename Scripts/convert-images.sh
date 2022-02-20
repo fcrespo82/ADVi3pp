@@ -8,8 +8,10 @@ This script requires Sketch application to work (macOS). If you do not have it, 
 third-parties open-source projects able to extract resources from a sketch file. Google is your friend.
 '
 
-sketchtool="/Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool"
-[[ -f ${sketchtool} ]] || { echo "Sorry, this script requires Sketch app (macOS) in order to work."; exit 1; }
+if [[ ! -v $SKIP_EXPORT ]] {
+    sketchtool="/Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool"
+    [[ -f ${sketchtool} ]] || { echo "Sorry, this script requires Sketch app (macOS) in order to work."; exit 1; }
+}
 
 scripts="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ret=$?; if [[ $ret != 0 ]]; then exit $ret; fi
@@ -55,14 +57,19 @@ function convert_images() {
 
 }
 
-clean_files "${sketch_export_dir}/DWIN_SET" "png"
-clean_files "${sketch_export_dir}/Controls" "png"
-clean_files "${sketch_export_dir}/Screenshots" "png"
+if [[ ! -v $SKIP_CLEAN ]] {
+    clean_files "${sketch_export_dir}/DWIN_SET" "png"
+    clean_files "${sketch_export_dir}/Controls" "png"
+    clean_files "${sketch_export_dir}/Screenshots" "png"
+}
+
 clean_files "${dgus}/DWIN_SET" "bmp"
 clean_files "${dgus}/25_Controls" "bmp"
 
-export_sketches
-ret=$?; if [[ $ret != 0 ]]; then exit $ret; fi
+if [[ ! -v $SKIP_EXPORT ]] {
+    export_sketches
+    ret=$?; if [[ $ret != 0 ]]; then exit $ret; fi
+}
 
 convert_images "${root}/Masters/Boot"             "${dgus}/DWIN_SET"
 convert_images "${root}/Sketch-Export/DWIN_SET"   "${dgus}/DWIN_SET"

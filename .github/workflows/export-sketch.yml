@@ -1,0 +1,21 @@
+name: Export Sketch artboards
+on: [workflow_dispatch]
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: macos-11
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Download latest Sketch from https://download.sketch.com/sketch-versions.xml
+        run: |
+          latest_sketch=$(curl -s https://download.sketch.com/sketch-versions.xml | grep -o 'https://.*\.zip' | head -n1)
+          wget $latest_sketch 
+          unzip $(basename $latest_sketch)
+      - name: Create Export folder
+        run: mkdir -p ./Sketch-Export
+      - run: ./Sketch.app/Contents/Resources/sketchtool/bin/sketchtool export artboards --output="./LCD-Panel/Sketch-Export" --overwriting=YES "./LCD-Panel/Masters/ADVi3++5 LCD-Panel.sketch"
+      - name: Commit files to git
+        run: |
+          git add ./LCD-Panel/Sketch-Export
+          git commit -m "Update exported artboards" || echo "Nothing to commit"
+          git push
