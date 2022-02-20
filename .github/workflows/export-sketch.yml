@@ -1,7 +1,7 @@
 name: Export Sketch artboards
 on: [workflow_dispatch]
 jobs:
-  Explore-GitHub-Actions:
+  Export-Sketch-artboards:
     runs-on: macos-11
     steps:
       - name: Check out repository code
